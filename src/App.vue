@@ -1,28 +1,44 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <a-layout>
+      <a-page-header
+          :title="currentTab"
+        />
+      <a-layout style="height: calc(100vh - 66px)">
+        <a-layout-sider theme="light">
+           <Sidebar />
+        </a-layout-sider>
+        <a-layout style="padding-left: 24px">
+          <a-layout-content
+            :style="{
+              background: '#fff',
+              padding: '24px',
+              margin: 0,
+            }"
+          >
+            <ContentPanel />
+          </a-layout-content>
+        </a-layout>
+      </a-layout>
+    </a-layout>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { mapState } from "vuex";
+import Sidebar from "./components/Sidebar.vue";
+import ContentPanel from './components/ContentPanel.vue'
 
 export default {
-  name: 'App',
+  computed: mapState({
+    currentTab: (state) => state.app.currentTab,
+  }),
   components: {
-    HelloWorld
-  }
-}
+    Sidebar,
+    ContentPanel
+  },
+};
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 </style>
