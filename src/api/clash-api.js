@@ -8,3 +8,7 @@ export function requestTraffic(onReceive) {
 export async function requestClashConfigs() {
   return request(CONFIG_URL)
 }
+
+export async function requestSaveClashConfigs(configs) {
+  return request(`${CONFIG_URL}`, 'PATCH', {}, { ...configs })
+}

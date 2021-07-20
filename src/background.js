@@ -1,8 +1,14 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
+import IPCCalls from './native-support/ipc-calls'
+import { curry } from './native-support/utils'
+import  { BRG_MSG_GET_CLASHY_CONFIG } from './native-support/message-constant'
+import { getCurrentConfig, initConfigsIfNeeded } from './native-support/configs-manager'
+import * as path from 'path'
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Scheme must be registered before the app is ready
@@ -10,9 +16,10 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
+let win;
 async function createWindow() {
   // Create the browser window.
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -20,7 +27,8 @@ async function createWindow() {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-      contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
+      preload: path.join(__dirname, 'preload.js'),
+      webSecurity: false
     }
   })
   win.setFullScreenable(false)
@@ -64,6 +72,14 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
+
+  initConfigsIfNeeded().then(() => {
+      // ClashBinary.spawnClash()
+      console.log('succeesss')
+  }).catch(e => {
+      console.error(e)
+  })
+
   createWindow()
 })
 
@@ -80,4 +96,47 @@ if (isDevelopment) {
       app.quit()
     })
   }
+}
+
+ipcMain.on('IPC_MESSAGE_QUEUE', (event, args) => {
+  resolveIPCCall(args, args.__callbackId, getCurrentConfig())
+})
+
+function dispatchIPCCalls(event) {
+  switch (event.__name) {
+    case BRG_MSG_GET_CLASHY_CONFIG:
+      resolveIPCCall(event, event.__callbackId, getCurrentConfig())
+      break
+    default: {
+      const call = IPCCalls[event.__name]
+      const resolve = curry(resolveIPCCall)(event)(event.__callbackId)
+      const reject = curry(rejectIPCCall)(event)(event.__callbackId)
+      if (call) {
+        call(event).then(resolve).catch(reject)
+      }
+      break
+    }
+  }
+}
+
+function resolveIPCCall(event, callbackId, result) {
+  if (win == null) {
+    return
+  }
+  win.webContents.send('IPC_MESSAGE_QUEUE', {
+    __callbackId: callbackId,
+    event,
+    value: result
+  })
+}
+
+function rejectIPCCall(event, callbackId, error) {
+  if (win == null) {
+    return
+  }
+  win.webContents.send('IPC_MESSAGE_QUEUE_REJECT', {
+    __callbackId: callbackId,
+    event,
+    value: error
+  })
 }

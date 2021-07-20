@@ -7,6 +7,7 @@
 <script>
 import { mapState } from 'vuex'
 import Status from './Status.vue'
+import Settings from './Settings.vue'
 
 export default {
   computed: {
@@ -15,7 +16,8 @@ export default {
     })
   },
   components: {
-    Status
+    Status,
+    Settings
   }
 }
 </script>
