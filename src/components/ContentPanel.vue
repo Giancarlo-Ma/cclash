@@ -1,6 +1,8 @@
 <template>
   <div style="height: 100%">
-    <component v-bind:is="currentTab"></component>
+    <a-card style="height: 100%">
+      <component v-bind:is="currentTab"></component>
+    </a-card>
   </div>
 </template>
 
@@ -8,6 +10,9 @@
 import { mapState } from 'vuex'
 import Status from './Status.vue'
 import Settings from './Settings.vue'
+import Profiles from './Profiles.vue'
+import Proxies from './Proxies.vue'
+import About from './About.vue'
 
 export default {
   computed: {
@@ -17,7 +22,10 @@ export default {
   },
   components: {
     Status,
-    Settings
+    Settings,
+    Profiles,
+    Proxies,
+    About
   }
 }
 </script>

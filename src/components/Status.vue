@@ -1,15 +1,13 @@
 <template>
   <div style="height: 100%">
-    <a-card style="height: 100%" v-if="configs">
-      <a-list :data-source="listData">
-        <a-list-item slot="renderItem" slot-scope="item">
-          <a-list-item-meta>
-            <span slot="title">{{ item.name }}</span>
-          </a-list-item-meta>
-          <div>{{ item.value }}</div>
-        </a-list-item>
-      </a-list>
-    </a-card>
+    <a-list :data-source="listData" v-if="configs">
+      <a-list-item slot="renderItem" slot-scope="item">
+        <a-list-item-meta>
+          <span slot="title">{{ item.name }}</span>
+        </a-list-item-meta>
+        <div>{{ item.value }}</div>
+      </a-list-item>
+    </a-list>
     <div v-else>
       <div v-if="error">{{ JSON.stringify(error) }}</div>
       <a-spin v-else />
