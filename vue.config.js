@@ -3,5 +3,8 @@ module.exports = {
     electronBuilder: {
       preload: 'src/preload.js',
     }
+  },
+  configureWebpack: {
+    devtool: 'source-map'
   }
 }

@@ -3,10 +3,10 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import IPCCalls from './native-support/ipc-calls'
-import { curry } from './native-support/utils'
-import  { BRG_MSG_GET_CLASHY_CONFIG } from './native-support/message-constant'
+import  { BRG_MSG_GET_CLASHY_CONFIG, BRG_MSG_FETCH_PROFILES } from './native-support/message-constant'
 import { getCurrentConfig, initConfigsIfNeeded } from './native-support/configs-manager'
+import { fetchProfiles } from './native-support/profiles-manager'
+import { spawnClash } from './native-support/clash-binary'
 import * as path from 'path'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -74,7 +74,7 @@ app.on('ready', async () => {
   }
 
   initConfigsIfNeeded().then(() => {
-      // ClashBinary.spawnClash()
+      spawnClash()
       console.log('succeesss')
   }).catch(e => {
       console.error(e)
@@ -99,7 +99,7 @@ if (isDevelopment) {
 }
 
 ipcMain.on('IPC_MESSAGE_QUEUE', (event, args) => {
-  resolveIPCCall(args, args.__callbackId, getCurrentConfig())
+  dispatchIPCCalls(args)
 })
 
 function dispatchIPCCalls(event) {
@@ -107,15 +107,13 @@ function dispatchIPCCalls(event) {
     case BRG_MSG_GET_CLASHY_CONFIG:
       resolveIPCCall(event, event.__callbackId, getCurrentConfig())
       break
-    default: {
-      const call = IPCCalls[event.__name]
-      const resolve = curry(resolveIPCCall)(event)(event.__callbackId)
-      const reject = curry(rejectIPCCall)(event)(event.__callbackId)
-      if (call) {
-        call(event).then(resolve).catch(reject)
-      }
+    case BRG_MSG_FETCH_PROFILES:
+      fetchProfiles().then((result) => {
+          resolveIPCCall(event, event.__callbackId, result)
+      }).catch(e => {
+          rejectIPCCall(event, event.__callbackId, e)
+      })
       break
-    }
   }
 }
 
