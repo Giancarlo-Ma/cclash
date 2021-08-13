@@ -5,7 +5,7 @@
           :title="currentTab"
         />
       <a-layout style="height: calc(100vh - 66px)">
-        <a-layout-sider theme="light">
+        <a-layout-sider width="130" theme="light">
            <Sidebar />
         </a-layout-sider>
         <a-layout style="padding-left: 24px">
