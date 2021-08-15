@@ -3,9 +3,10 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import  { BRG_MSG_GET_CLASHY_CONFIG, BRG_MSG_FETCH_PROFILES } from './native-support/message-constant'
+import { BRG_MSG_GET_CLASHY_CONFIG, BRG_MSG_FETCH_PROFILES, BRG_MSG_ADD_SUBSCRIBE } from './native-support/message-constant'
 import { getCurrentConfig, initConfigsIfNeeded } from './native-support/configs-manager'
 import { fetchProfiles } from './native-support/profiles-manager'
+import { addSubscription, deleteSubscription } from './native-support/subscription-updater'
 import { spawnClash } from './native-support/clash-binary'
 import * as path from 'path'
 
@@ -74,10 +75,10 @@ app.on('ready', async () => {
   }
 
   initConfigsIfNeeded().then(() => {
-      spawnClash()
-      console.log('succeesss')
+    spawnClash()
+    console.log('succeesss')
   }).catch(e => {
-      console.error(e)
+    console.error(e)
   })
 
   createWindow()
@@ -109,10 +110,25 @@ function dispatchIPCCalls(event) {
       break
     case BRG_MSG_FETCH_PROFILES:
       fetchProfiles().then((result) => {
-          resolveIPCCall(event, event.__callbackId, result)
+        resolveIPCCall(event, event.__callbackId, result)
       }).catch(e => {
-          rejectIPCCall(event, event.__callbackId, e)
+        rejectIPCCall(event, event.__callbackId, e)
       })
+      break
+    case BRG_MSG_ADD_SUBSCRIBE:
+      console.log(event)
+      addSubscription(event.arg)
+        .then(() => {
+          resolveIPCCall(event, event.__callbackId)
+        })
+        .catch(e => {
+          console.log(e.message)
+          // deleteSubscription(event.arg)
+          //   .catch(e => console.log(e))
+          //   .finally(() => {
+          //       rejectIPCCall(event, event.__callbackId, e)
+          //   })
+        })
       break
   }
 }

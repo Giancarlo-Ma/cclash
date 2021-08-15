@@ -4,7 +4,7 @@ import { getDataPath, isElectronDebug, mkDir, getAppPath, copyFile } from './uti
 
 export async function initConfigsIfNeeded() {
   await _createClashyConfigsIfNeeded()
-  // await createSubscriptionFileIfNeeded()
+  createSubscriptionFileIfNeeded()
   await _createClashConfigsIfNeeded()
 }
 
@@ -12,8 +12,14 @@ export function getConfigPath() {
   return path.join(getDataPath(), 'clashy-configs', 'configs.json')
 }
 
-export function getDefaultClashConfig() {
+function getDefaultClashConfig() {
   return path.join(getDataPath(), 'clash-configs', 'config.yaml')
+}
+
+export function getDefaultClashConfigPath() {
+  console.log(getDataPath())
+  return ''
+  // /????
 }
 
 export function getInitialConfig() {
@@ -62,21 +68,19 @@ export function setSocksPort(socksPort) {
   })
 }
 
-// async function createSubscriptionFileIfNeeded() {
-//   const subscriptions = path.join(getDataPath(), 'clashy-configs', 'subscriptions.json')
-//   const exist = fs.existsSync(subscriptions)
-//   if (!exist) {
-//       if (isElectronDebug()) {
-//           console.log('Subscription file not exist, creating...')
-//       }
-//       let fd = fs.openSync(subscriptions, 'w+')
-//       fs.closeSync(fd)
-//       fs.writeFileSync(subscriptions, '{"subscriptions" : []}')
-//       if (isElectronDebug()) {
-//           console.log('Created subscription file.')
-//       }
-//   }
-// }
+export function createSubscriptionFileIfNeeded() {
+  const subscriptions = path.join(getDataPath(), 'clashy-configs', 'subscriptions.json')
+  const exist = fs.existsSync(subscriptions)
+  if (!exist) {
+      if (isElectronDebug()) {
+          console.log('Subscription file not exist, creating...')
+      }
+      fs.writeFileSync(subscriptions, '{"subscriptions" : []}')
+      if (isElectronDebug()) {
+          console.log('Created subscription file.')
+      }
+  }
+}
 
 async function _createClashyConfigsIfNeeded() {
   const clashyConfigs = path.join(getDataPath(), 'clashy-configs')
@@ -90,8 +94,6 @@ async function _createClashyConfigsIfNeeded() {
   const clashyConfigFile = path.join(getDataPath(), 'clashy-configs', 'configs.json')
   exist = fs.existsSync(clashyConfigFile)
   if (!exist) {
-    // let fd = fs.openSync(clashyConfigFile, 'w+')
-    // fs.closeSync(fd)
     fs.writeFileSync(clashyConfigFile, '')
     if (isElectronDebug()) {
       console.log('Created Clashy configs.')

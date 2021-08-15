@@ -2,7 +2,7 @@ const resolves = {}
 const rejections = {}
 
 export function callIPC(name, params) {
-    console.log(window.electronIPC)
+    console.log(params)
     if (!window.electronIPC || !window.electronIPC.send) {
         return new Promise(() => null)
     }

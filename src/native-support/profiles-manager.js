@@ -8,7 +8,7 @@ import { getCurrentConfig } from './configs-manager'
 
 const readDir = promisify(readdir)
 
-export function fetchProfiles() {
+export async function fetchProfiles() {
   const folderName = path.resolve(getDataPath(), 'clash-configs')
   return readDir(folderName).then(folderContents => {
       const profiles = folderContents
