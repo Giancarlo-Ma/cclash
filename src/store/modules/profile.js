@@ -1,5 +1,6 @@
 import { callIPC } from "../../native-support/message-queue"
-import { BRG_MSG_FETCH_PROFILES, BRG_MSG_ADD_SUBSCRIBE } from '../../native-support/message-constant'
+import { BRG_MSG_FETCH_PROFILES, BRG_MSG_ADD_SUBSCRIBE, BRG_MSG_SWITCHED_PROFILE } from '../../native-support/message-constant'
+import { requestSwitchConfigs } from "../../api/clash-api"
 
 const state = () => ({
   profiles: [],
@@ -54,6 +55,22 @@ const actions = {
       commit(profileMutationTypes.TOGGLE_LOADING, { loading: false });
 			commit(profileMutationTypes.GOT_ERROR, { error: err })
 		}
+  },
+  async switchProfile({ commit, dispatch }, { profileUrl }) {
+    try {
+      commit(profileMutationTypes.TOGGLE_LOADING, { loading: true });
+      const res = await requestSwitchConfigs(profileUrl || '')
+      if(res == null) {
+        await callIPC(BRG_MSG_SWITCHED_PROFILE, profileUrl)
+        await dispatch('fetchProfiles')
+      } else {
+        throw res
+      }
+    } catch (e) {
+      commit(profileMutationTypes.TOGGLE_LOADING, { loading: false });
+      const msg = e.message || 'Network Error.'
+      commit(profileMutationTypes.GOT_ERROR, { error: msg });
+    }
   }
 }
 

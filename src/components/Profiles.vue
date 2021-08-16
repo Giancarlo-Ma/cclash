@@ -7,7 +7,7 @@
             <template slot="actions" class="ant-card-actions">
               <a-icon key="reload" type="reload" />
               <a-icon key="delete" type="delete" />
-              <a-checkbox :checked="profile.url === currentProfile" />
+              <a-checkbox :checked="profile.url === currentProfile" @change="onSwitchProfile($event, profile.url)"/>
             </template>
             <a-card-meta :title="profile.name" />
           </a-card>
@@ -52,10 +52,14 @@ export default {
     this.fetchProfiles();
   },
   methods: {
-    ...mapActions("profile", ["fetchProfiles", "addProfile"]),
+    ...mapActions("profile", ["fetchProfiles", "addProfile", "switchProfile"]),
     saveSubscription() {
       this.addProfile({ url: this.subscriptionAddress });
     },
+    async onSwitchProfile(e, url) {
+      if(!e.target.checked) return;
+      await this.switchProfile({profileUrl: url});
+    }
   },
 };
 </script>

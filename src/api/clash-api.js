@@ -12,3 +12,8 @@ export async function requestClashConfigs() {
 export async function requestSaveClashConfigs(configs) {
   return request(`${CONFIG_URL}`, 'PATCH', {}, { ...configs })
 }
+
+export async function requestSwitchConfigs(path) {
+  // 强制改变端口
+  return request(`${CONFIG_URL}?force=true`, 'PUT', {}, { path })
+}

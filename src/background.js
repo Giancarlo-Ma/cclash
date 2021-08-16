@@ -3,8 +3,8 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import { BRG_MSG_GET_CLASHY_CONFIG, BRG_MSG_FETCH_PROFILES, BRG_MSG_ADD_SUBSCRIBE } from './native-support/message-constant'
-import { getCurrentConfig, initConfigsIfNeeded } from './native-support/configs-manager'
+import { BRG_MSG_GET_CLASHY_CONFIG, BRG_MSG_FETCH_PROFILES, BRG_MSG_ADD_SUBSCRIBE, BRG_MSG_SWITCHED_PROFILE } from './native-support/message-constant'
+import { getCurrentConfig, initConfigsIfNeeded, setProfile } from './native-support/configs-manager'
 import { fetchProfiles } from './native-support/profiles-manager'
 import { addSubscription, deleteSubscription } from './native-support/subscription-updater'
 import { spawnClash } from './native-support/clash-binary'
@@ -130,6 +130,10 @@ function dispatchIPCCalls(event) {
           //   })
         })
       break
+    case BRG_MSG_SWITCHED_PROFILE:
+			setProfile(event.arg)
+			resolveIPCCall(event, event.__callbackId, null)
+			break
   }
 }
 

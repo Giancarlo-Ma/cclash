@@ -123,3 +123,13 @@ async function _createClashConfigsIfNeeded() {
     return
   }
 }
+
+export function setProfile(profile) {
+  if (profile == null || profile.length === 0) {
+      profile = getDefaultClashConfig()
+  }
+  saveConfig({
+      ...getCurrentConfig(),
+      currentProfile: profile
+  })
+}
