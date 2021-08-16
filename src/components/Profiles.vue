@@ -5,7 +5,7 @@
         <a-col v-for="profile in profiles" :key="profile.url" :span="8">
           <a-card hoverable style="width: 180px">
             <template slot="actions" class="ant-card-actions">
-              <a-icon key="reload" type="reload" />
+              <a-icon key="reload" type="reload" @click="onReloadProfile(profile.url)"/>
               <a-icon key="delete" type="delete" />
               <a-checkbox :checked="profile.url === currentProfile" @change="onSwitchProfile($event, profile.url)"/>
             </template>
@@ -52,13 +52,16 @@ export default {
     this.fetchProfiles();
   },
   methods: {
-    ...mapActions("profile", ["fetchProfiles", "addProfile", "switchProfile"]),
+    ...mapActions("profile", ["fetchProfiles", "addProfile", "switchProfile", "reloadProfile"]),
     saveSubscription() {
       this.addProfile({ url: this.subscriptionAddress });
     },
     async onSwitchProfile(e, url) {
       if(!e.target.checked) return;
       await this.switchProfile({profileUrl: url});
+    },
+    async onReloadProfile(url) {
+      await this.reloadProfile(url)
     }
   },
 };

@@ -3,10 +3,10 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import { BRG_MSG_GET_CLASHY_CONFIG, BRG_MSG_FETCH_PROFILES, BRG_MSG_ADD_SUBSCRIBE, BRG_MSG_SWITCHED_PROFILE } from './native-support/message-constant'
+import { BRG_MSG_GET_CLASHY_CONFIG, BRG_MSG_FETCH_PROFILES, BRG_MSG_ADD_SUBSCRIBE, BRG_MSG_SWITCHED_PROFILE, BRG_MSG_RELOAD_PROFILE } from './native-support/message-constant'
 import { getCurrentConfig, initConfigsIfNeeded, setProfile } from './native-support/configs-manager'
 import { fetchProfiles } from './native-support/profiles-manager'
-import { addSubscription, deleteSubscription } from './native-support/subscription-updater'
+import { addSubscription, updateSubscription } from './native-support/subscription-updater'
 import { spawnClash } from './native-support/clash-binary'
 import * as path from 'path'
 
@@ -134,6 +134,14 @@ function dispatchIPCCalls(event) {
 			setProfile(event.arg)
 			resolveIPCCall(event, event.__callbackId, null)
 			break
+    case BRG_MSG_RELOAD_PROFILE:
+      updateSubscription(event.arg).then(() => {
+          resolveIPCCall(event, event.__callbackId)
+      }).catch(e => {
+          console.error(e)
+          rejectIPCCall(event, event.__callbackId, e)
+      })
+      break
   }
 }
 

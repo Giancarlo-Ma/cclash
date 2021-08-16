@@ -81,3 +81,29 @@ async function _addSubscriptions(subscriptions) {
   console.log(current)
   _saveSubscriptions(current)
 }
+
+export async function updateSubscription(fileName) {
+  if (fileName == null || fileName.length === 0) {
+      return Promise.resolve()
+  }
+  const saved = await getSavedSubscriptions()
+  const target = (saved.subscriptions || []).find(each => {
+      return each.fileName === fileName
+  })
+  const url = target.url
+  let resp = null
+  if (url.startsWith('https://')) {
+      resp = await fetchHttps(url)
+  } else {
+      resp = await fetchHttp(url)
+  }
+  // Purge current config content
+  const fd = await openFile(fileName, 'w+')
+  await writeFile(fd, '')
+  await closeFile(fd)
+
+  // Write current config content
+  const stream = fs.createWriteStream(fileName)
+  await writeStream(stream, resp)
+  stream.close()
+}
