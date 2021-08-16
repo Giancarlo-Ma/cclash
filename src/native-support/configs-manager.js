@@ -109,9 +109,9 @@ async function _createClashConfigsIfNeeded() {
       console.log('Clash configs not exist, creating...')
     }
     await mkDir(clashConfigPath)
-    const defaultConfig = path.resolve(getAppPath(), 'clash-configs', 'config.yaml')
+    const defaultConfig = path.resolve('./', 'clash-configs', 'config.yaml')
     await copyFile(defaultConfig, path.resolve(clashConfigPath, 'config.yaml'))
-    const mmdb = path.resolve(getAppPath(), 'clash-configs', 'Country.mmdb')
+    const mmdb = path.resolve('./', 'clash-configs', 'Country.mmdb')
     await copyFile(mmdb, path.resolve(clashConfigPath, 'Country.mmdb'))
     if (isElectronDebug()) {
       console.log('Clash configs & mmdb created.')
