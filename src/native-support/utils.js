@@ -3,6 +3,8 @@ import * as fs from 'fs'
 import { promisify } from 'util'
 import http from 'http'
 import https from 'https'
+import { basename } from 'path'
+import { URL } from 'url'
 
 export const copyFile = promisify(fs.copyFile)
 
@@ -45,40 +47,37 @@ export function isLinux() {
   return process.platform === 'linux'
 }
 
-export function fetchHttps(url) {
-  return new Promise((resolve, reject) => {
-    const options = {
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8'
-      }
-    }
-    const req = https.request(url, options, resp => {
-      let data = ''
-      resp.on('error', e => reject(e))
-      resp.on('data', chunk => { data += chunk })
-      resp.on('end', () => resolve(data))
-    }).on('error', err => reject(err))
-    req.end()
-  })
-}
+const TIMEOUT = 10000
 
-export function fetchHttp(url, method, params) {
+export function download (url, dest) {
+  const uri = new URL(url)
+  const pkg = url.toLowerCase().startsWith('https:') ? https : http
+
   return new Promise((resolve, reject) => {
-    const data = JSON.stringify(params || {})
-    const options = {
-      method: method == null || method.length === 0 ? 'GET' : method,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8'
+    const request = pkg.get(uri.href).on('response', (res) => {
+      if (res.statusCode === 200) {
+        const file = fs.createWriteStream(dest, { flags: 'wx' })
+        res
+          .on('end', () => {
+            file.end()
+            // console.log(`${uri.pathname} downloaded to: ${path}`)
+            resolve()
+          })
+          .on('error', (err) => {
+            file.destroy()
+            fs.unlink(dest, () => reject(err))
+          }).pipe(file)
+      } else if (res.statusCode === 302 || res.statusCode === 301) {
+        // Recursively follow redirects, only a 200 will resolve.
+        download(res.headers.location, dest).then(() => resolve())
+      } else {
+        reject(new Error(`Download request failed, response status: ${res.statusCode} ${res.statusMessage}`))
       }
-    }
-    const req = http.request(url, options, resp => {
-      let data = ''
-      resp.on('error', e => reject(e))
-      resp.on('data', chunk => { data += chunk })
-      resp.on('end', () => resolve(data))
-    }).on('error', err => reject(err))
-    req.write(data)
-    req.end()
+    })
+    request.setTimeout(TIMEOUT, function () {
+      request.destroy()
+      reject(new Error(`Request timeout after ${TIMEOUT / 1000.0}s`))
+    })
   })
 }
 

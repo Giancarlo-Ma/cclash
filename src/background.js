@@ -3,10 +3,10 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import { BRG_MSG_GET_CLASHY_CONFIG, BRG_MSG_FETCH_PROFILES, BRG_MSG_ADD_SUBSCRIBE, BRG_MSG_SWITCHED_PROFILE, BRG_MSG_RELOAD_PROFILE } from './native-support/message-constant'
-import { getCurrentConfig, initConfigsIfNeeded, setProfile } from './native-support/configs-manager'
+import { BRG_MSG_GET_CLASHY_CONFIG, FETCH_PROFILES, ADD_PROFILE, SWITCH_PROFILE, RELOAD_PROFILE, DELETE_PROFILE } from './native-support/message-constant'
+import { getCurrentConfig, initConfigsIfNeeded, switchProfile } from './native-support/configs-manager'
 import { fetchProfiles } from './native-support/profiles-manager'
-import { addSubscription, updateSubscription } from './native-support/subscription-updater'
+import { addProfile, reloadProfile, deleteProfile } from './native-support/subscription-updater'
 import { spawnClash } from './native-support/clash-binary'
 import * as path from 'path'
 
@@ -65,6 +65,11 @@ app.on('activate', () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
+  ipcMain.handle(FETCH_PROFILES, fetchProfiles)
+  ipcMain.handle(SWITCH_PROFILE, switchProfile)
+  ipcMain.handle(ADD_PROFILE, addProfile)
+  ipcMain.handle(DELETE_PROFILE, deleteProfile)
+  ipcMain.handle(RELOAD_PROFILE, reloadProfile)
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
     try {
@@ -73,13 +78,12 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
-
-  initConfigsIfNeeded().then(() => {
+  await initConfigsIfNeeded()
+  try {
     spawnClash()
-    console.log('succeesss')
-  }).catch(e => {
+  } catch {
     console.error(e)
-  })
+  }
 
   createWindow()
 })
@@ -108,40 +112,43 @@ function dispatchIPCCalls(event) {
     case BRG_MSG_GET_CLASHY_CONFIG:
       resolveIPCCall(event, event.__callbackId, getCurrentConfig())
       break
-    case BRG_MSG_FETCH_PROFILES:
-      fetchProfiles().then((result) => {
-        resolveIPCCall(event, event.__callbackId, result)
-      }).catch(e => {
-        rejectIPCCall(event, event.__callbackId, e)
-      })
-      break
-    case BRG_MSG_ADD_SUBSCRIBE:
-      console.log(event)
-      addSubscription(event.arg)
-        .then(() => {
-          resolveIPCCall(event, event.__callbackId)
-        })
-        .catch(e => {
-          console.log(e.message)
-          // deleteSubscription(event.arg)
-          //   .catch(e => console.log(e))
-          //   .finally(() => {
-          //       rejectIPCCall(event, event.__callbackId, e)
-          //   })
-        })
-      break
-    case BRG_MSG_SWITCHED_PROFILE:
-			setProfile(event.arg)
-			resolveIPCCall(event, event.__callbackId, null)
-			break
-    case BRG_MSG_RELOAD_PROFILE:
-      updateSubscription(event.arg).then(() => {
-          resolveIPCCall(event, event.__callbackId)
-      }).catch(e => {
-          console.error(e)
-          rejectIPCCall(event, event.__callbackId, e)
-      })
-      break
+    // case BRG_MSG_ADD_SUBSCRIBE:
+    //   console.log(event)
+    //   addSubscription(event.arg)
+    //     .then(() => {
+    //       resolveIPCCall(event, event.__callbackId)
+    //     })
+    //     .catch(e => {
+    //       console.log(e.message)
+    //       // deleteSubscription(event.arg)
+    //       //   .catch(e => console.log(e))
+    //       //   .finally(() => {
+    //       //       rejectIPCCall(event, event.__callbackId, e)
+    //       //   })
+    //     })
+    //   break
+    // case BRG_MSG_SWITCHED_PROFILE:
+    //   switchProfile(event.arg)
+    //   resolveIPCCall(event, event.__callbackId, null)
+    //   break
+    // case BRG_MSG_RELOAD_PROFILE:
+    //   updateSubscription(event.arg).then(() => {
+    //     resolveIPCCall(event, event.__callbackId)
+    //   }).catch(e => {
+    //     console.error(e)
+    //     rejectIPCCall(event, event.__callbackId, e)
+    //   })
+    //   break
+    // case BRG_MSG_DELETE_SUBSCRIBE:
+    //   deleteSubscription(event.arg)
+    //     .then(() => {
+    //       if (event.arg === getCurrentConfig().currentProfile) {
+    //         setProxy('', '')
+    //       }
+    //       resolveIPCCall(event, event.__callbackId, {})
+    //     })
+    //     .catch(e => rejectIPCCall(event, event.__callbackId, e))
+    //   break
   }
 }
 

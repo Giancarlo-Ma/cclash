@@ -82,6 +82,7 @@ export function createSubscriptionFileIfNeeded() {
   }
 }
 
+// 创造clashy-configs文件夹和configs.json文件
 async function _createClashyConfigsIfNeeded() {
   const clashyConfigs = path.join(getDataPath(), 'clashy-configs')
   let exist = fs.existsSync(clashyConfigs)
@@ -124,12 +125,21 @@ async function _createClashConfigsIfNeeded() {
   }
 }
 
-export function setProfile(profile) {
+export function switchProfile(e, profile) {
+  console.log(profile)
   if (profile == null || profile.length === 0) {
       profile = getDefaultClashConfig()
   }
   saveConfig({
       ...getCurrentConfig(),
       currentProfile: profile
+  })
+}
+
+export function setProxy(selector, proxy) {
+  saveConfig({
+      ...getCurrentConfig(),
+      currentProxy: proxy || '',
+      currentSelector: selector || ''
   })
 }

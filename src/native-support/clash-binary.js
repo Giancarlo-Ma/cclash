@@ -39,7 +39,7 @@ export function getClashBinaryPath() {
   return ret
 }
 
-export function spawnClash() {
+export function spawnClash(configName) {
   if (clashProcess != null && !clashProcess.killed) {
     return
   }

@@ -2,13 +2,14 @@ import { join } from 'path';
 import * as fs from 'fs';
 import { getDataPath } from './utils';
 import { createSubscriptionFileIfNeeded } from './configs-manager'
-import { MALFORM_URL, NOT_SUPPORTED_PROTOCOL } from '../errorMessage'
+import { MALFORM_URL } from '../errorMessage'
 import { emptySubscriptions } from './defaultFileContent'
-import { fetchHttps, fetchHttp } from './utils';
+import { download } from './utils';
 
 async function getSavedSubscriptions() {
   createSubscriptionFileIfNeeded();
   const file = join(getDataPath(), 'clashy-configs', 'subscriptions.json');
+  console.log(file)
   const content = fs.readFileSync(file, 'utf8')
   if (content == null || content.length === 0) {
     fs.writeFileSync(file, JSON.stringify(emptySubscriptions))
@@ -26,7 +27,7 @@ async function getSavedSubscriptions() {
   }
 }
 
-export async function addSubscription(url) {
+export async function addProfile(e, url) {
   if (url == null || url.length === 0) {
     return Promise.reject(new Error(MALFORM_URL))
   }
@@ -35,14 +36,7 @@ export async function addSubscription(url) {
   const fileName = join(getDataPath(), 'clash-configs', `${name}.yml`)
   const exist = fs.existsSync(fileName);
   if(!exist) {
-    let resp = null
-    if (parsedUrl.protocol === 'https:') {
-      resp = await fetchHttps(url)
-    } else if (parsedUrl.protocol === 'http:') {
-      resp = await fetchHttp(url, 'GET')
-    } else return Promise.reject(new Error(NOT_SUPPORTED_PROTOCOL))
-    console.log(typeof resp)
-    fs.writeFileSync(fileName, resp)
+    await download(url, fileName)
     await _addSubscriptions([{
       fileName,
       url
@@ -50,7 +44,7 @@ export async function addSubscription(url) {
   }
 }
 
-export async function deleteSubscription(fileName) {
+export async function deleteProfile(e, fileName) {
   if (fileName == null || fileName.length === 0) {
     return Promise.resolve()
   }
@@ -82,7 +76,7 @@ async function _addSubscriptions(subscriptions) {
   _saveSubscriptions(current)
 }
 
-export async function updateSubscription(fileName) {
+export async function reloadProfile(e, fileName) {
   if (fileName == null || fileName.length === 0) {
       return Promise.resolve()
   }
@@ -91,19 +85,11 @@ export async function updateSubscription(fileName) {
       return each.fileName === fileName
   })
   const url = target.url
-  let resp = null
-  if (url.startsWith('https://')) {
-      resp = await fetchHttps(url)
-  } else {
-      resp = await fetchHttp(url)
-  }
+
   // Purge current config content
   const fd = await openFile(fileName, 'w+')
   await writeFile(fd, '')
   await closeFile(fd)
 
-  // Write current config content
-  const stream = fs.createWriteStream(fileName)
-  await writeStream(stream, resp)
-  stream.close()
+  await download(url, fileName)
 }

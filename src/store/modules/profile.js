@@ -1,5 +1,3 @@
-import { callIPC } from "../../native-support/message-queue"
-import { BRG_MSG_FETCH_PROFILES, BRG_MSG_ADD_SUBSCRIBE, BRG_MSG_SWITCHED_PROFILE, BRG_MSG_RELOAD_PROFILE } from '../../native-support/message-constant'
 import { requestSwitchConfigs } from "../../api/clash-api"
 
 const state = () => ({
@@ -39,7 +37,7 @@ const actions = {
   async fetchProfiles({ commit }) {
 		try {
 			commit(profileMutationTypes.TOGGLE_LOADING, { loading: true });
-      const { profiles = [], currentProfile = '' } = await callIPC(BRG_MSG_FETCH_PROFILES)
+      const { profiles = [], currentProfile = '' } = await window.electronAPI.fetchProfiles();
       commit(profileMutationTypes.GOT_PROFILES, { profiles, currentProfile })
 		} catch (err) {
       commit(profileMutationTypes.TOGGLE_LOADING, { loading: false });
@@ -49,7 +47,7 @@ const actions = {
   async addProfile({ commit, dispatch }, { url = '' }) {
     try {
       commit(profileMutationTypes.TOGGLE_LOADING, { loading: true });
-      await callIPC(BRG_MSG_ADD_SUBSCRIBE, url)
+      await window.electronAPI.addProfile(url);
       await dispatch('fetchProfiles')
     } catch (err) {
       commit(profileMutationTypes.TOGGLE_LOADING, { loading: false });
@@ -61,7 +59,7 @@ const actions = {
       commit(profileMutationTypes.TOGGLE_LOADING, { loading: true });
       const res = await requestSwitchConfigs(profileUrl || '')
       if(res == null) {
-        await callIPC(BRG_MSG_SWITCHED_PROFILE, profileUrl)
+        await window.electronAPI.switchProfile(profileUrl);
         await dispatch('fetchProfiles')
       } else {
         throw res
@@ -74,9 +72,15 @@ const actions = {
   },
   async reloadProfile({commit, dispatch}, { profileUrl }) {
     commit(profileMutationTypes.TOGGLE_LOADING, { loading: true });
-    await callIPC(BRG_MSG_RELOAD_PROFILE, profileUrl);
+    await window.electronAPI.reloadProfile(profileUrl);
     await dispatch('fetchProfiles')
-  }
+  },
+  async deleteProfile({commit, dispatch }, {  profileUrl }) {
+    commit(profileMutationTypes.TOGGLE_LOADING, { loading: true });
+    console.log(`delete ${profileUrl}`)
+    await window.electronAPI.deleteProfile(profileUrl);
+    await dispatch('fetchProfiles')
+  },
 }
 
 export default {

@@ -5,9 +5,20 @@
         <a-col v-for="profile in profiles" :key="profile.url" :span="8">
           <a-card hoverable style="width: 180px">
             <template slot="actions" class="ant-card-actions">
-              <a-icon key="reload" type="reload" @click="onReloadProfile(profile.url)"/>
-              <a-icon key="delete" type="delete" />
-              <a-checkbox :checked="profile.url === currentProfile" @change="onSwitchProfile($event, profile.url)"/>
+              <a-icon
+                key="reload"
+                type="reload"
+                @click="onReloadProfile(profile.url)"
+              />
+              <a-icon
+                key="delete"
+                type="delete"
+                @click="onDeleteProfile(profile)"
+              />
+              <a-checkbox
+                :checked="profile.url === currentProfile"
+                @change="onSwitchProfile($event, profile.url)"
+              />
             </template>
             <a-card-meta :title="profile.name" />
           </a-card>
@@ -34,6 +45,7 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
+import { requestSwitchConfigs } from "../api/clash-api";
 export default {
   data() {
     return {
@@ -50,19 +62,34 @@ export default {
   },
   created() {
     this.fetchProfiles();
+    if (!this.currentProfile.endsWith("config.yaml"))
+      requestSwitchConfigs(this.currentProfile || "");
   },
   methods: {
-    ...mapActions("profile", ["fetchProfiles", "addProfile", "switchProfile", "reloadProfile"]),
+    ...mapActions("profile", [
+      "fetchProfiles",
+      "addProfile",
+      "switchProfile",
+      "reloadProfile",
+      "deleteProfile",
+    ]),
     saveSubscription() {
       this.addProfile({ url: this.subscriptionAddress });
     },
     async onSwitchProfile(e, url) {
-      if(!e.target.checked) return;
-      await this.switchProfile({profileUrl: url});
+      if (!e.target.checked) return;
+      await this.switchProfile({ profileUrl: url });
     },
     async onReloadProfile(url) {
-      await this.reloadProfile(url)
-    }
+      await this.reloadProfile(url);
+    },
+    async onDeleteProfile({ url, name }) {
+      if (name === "config.yaml") {
+        this.$message.error("不能删除config.yml");
+        return;
+      }
+      await this.deleteProfile({ profileUrl: url });
+    },
   },
 };
 </script>
