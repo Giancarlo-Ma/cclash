@@ -2,10 +2,10 @@ import { promisify } from 'util'
 import { readdir } from 'fs'
 import path from 'path'
 
-import { getDataPath } from './utils'
+import { getDataPath, fetchHttp } from './utils'
 import { getCurrentConfig } from './configs-manager'
 
-
+const BASE_URL = 'http://localhost:2390'
 const readDir = promisify(readdir)
 
 export async function fetchProfiles() {
@@ -26,4 +26,16 @@ export async function fetchProfiles() {
 		profiles,
 		currentProfile
 	}
+}
+
+export async function switchToCurrentProfile() {
+	const { currentProfile, currentSelector, currentProxy } = getCurrentConfig()
+	await fetchHttp(`${BASE_URL}/configs`, 'PUT', {
+			path: currentProfile
+	})
+	const body = {
+			name: currentProxy,
+			'log-level': 'warning'
+	}
+	return await fetchHttp(`${BASE_URL}/proxies/${currentSelector}`, 'PUT', body)
 }

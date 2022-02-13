@@ -2,7 +2,8 @@ import path from 'path'
 import { exec } from 'child_process';
 import * as fs from 'fs';
 
-import { isElectronDebug, getDataPath, isWindows } from './utils';
+import { isElectronDebug, getDataPath, isWindows,  } from './utils';
+import {switchToCurrentProfile } from './profiles-manager'
 
 let clashProcess = null;
 
@@ -59,7 +60,20 @@ export function spawnClash(configName) {
     console.log('Spawn cmd = ' + cmd)
   }
   clashProcess = exec(cmd, { detached: true })
-  // setTimeout(() => {
-  //   switchToCurrentProfile()
-  // }, 500)
+  setTimeout(() => {
+    switchToCurrentProfile()
+  }, 500)
+}
+
+export function killClash() {
+  if (clashProcess) {
+      if (isWindows()) {
+          spawnSync("taskkill", ["/pid", clashProcess.pid, '/f', '/t'])
+      } else if (clashProcess.kill) {
+          clashProcess.kill('SIGINT')
+      } else if (clashProcess.pid) {
+          process.kill(clashProcess.pid, 'SIGINT')
+      }
+      clashProcess = null
+  }
 }

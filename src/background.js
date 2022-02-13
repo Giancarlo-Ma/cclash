@@ -7,7 +7,7 @@ import { GET_VCLASH_CONFIG, FETCH_PROFILES, ADD_PROFILE, SWITCH_PROFILE, RELOAD_
 import { getCurrentConfig, initConfigsIfNeeded, switchProfile, switchProxy } from './native-support/configs-manager'
 import { fetchProfiles } from './native-support/profiles-manager'
 import { addProfile, reloadProfile, deleteProfile } from './native-support/subscription-updater'
-import { spawnClash } from './native-support/clash-binary'
+import { spawnClash, killClash } from './native-support/clash-binary'
 import * as path from 'path'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -59,6 +59,10 @@ app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
+})
+
+app.on('will-quit', () => {
+  killClash()
 })
 
 // This method will be called when Electron has finished

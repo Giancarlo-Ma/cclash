@@ -45,7 +45,7 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
-import { requestSwitchConfigs } from "../api/clash-api";
+
 export default {
   data() {
     return {
@@ -62,8 +62,6 @@ export default {
   },
   created() {
     this.fetchProfiles();
-    if (!this.currentProfile.endsWith("config.yaml"))
-      requestSwitchConfigs(this.currentProfile || "");
   },
   methods: {
     ...mapActions("profile", [
