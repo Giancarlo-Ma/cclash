@@ -1,5 +1,5 @@
 {
-  "name": "my-clash",
+  "name": "vclash",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -14,9 +14,6 @@
   "main": "background.js",
   "dependencies": {
     "ant-design-vue": "^1.7.6",
-    "axios": "^0.21.1",
-    "core-js": "^3.6.5",
-    "less-loader": "^10.0.1",
     "vue": "^2.6.11",
     "vuex": "^3.6.2"
   },

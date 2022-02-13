@@ -15,7 +15,6 @@ export async function requestSaveClashConfigs(configs) {
 }
 
 export async function requestSwitchConfigs(path) {
-  console.log(path)
   // 强制改变端口
   return request(`${CONFIG_URL}?force=true`, 'PUT', {}, { path })
 }

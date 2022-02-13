@@ -1,4 +1,4 @@
-export const GET_CLASHY_CONFIG = 'GET_CLASHY_CONFIG';
+export const GET_VCLASH_CONFIG = 'GET_VCLASH_CONFIG';
 
 export const FETCH_PROFILES = 'FETCH_PROFILES';
 export const ADD_PROFILE = 'ADD_PROFILE';

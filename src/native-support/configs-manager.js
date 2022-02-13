@@ -3,13 +3,13 @@ import path from 'path';
 import { getDataPath, isElectronDebug, mkDir, getAppPath, copyFile } from './utils'
 
 export async function initConfigsIfNeeded() {
-  await _createClashyConfigsIfNeeded()
+  await _createVclashConfigsIfNeeded()
   createSubscriptionFileIfNeeded()
   await _createClashConfigsIfNeeded()
 }
 
 export function getConfigPath() {
-  return path.join(getDataPath(), 'clashy-configs', 'configs.json')
+  return path.join(getDataPath(), 'vclash-configs', 'configs.json')
 }
 
 function getDefaultClashConfig() {
@@ -69,7 +69,7 @@ export function setSocksPort(socksPort) {
 }
 
 export function createSubscriptionFileIfNeeded() {
-  const subscriptions = path.join(getDataPath(), 'clashy-configs', 'subscriptions.json')
+  const subscriptions = path.join(getDataPath(), 'vclash-configs', 'subscriptions.json')
   const exist = fs.existsSync(subscriptions)
   if (!exist) {
     if (isElectronDebug()) {
@@ -82,22 +82,22 @@ export function createSubscriptionFileIfNeeded() {
   }
 }
 
-// 创造clashy-configs文件夹和configs.json文件
-async function _createClashyConfigsIfNeeded() {
-  const clashyConfigs = path.join(getDataPath(), 'clashy-configs')
-  let exist = fs.existsSync(clashyConfigs)
+// 创造vclash-configs文件夹和configs.json文件
+async function _createVclashConfigsIfNeeded() {
+  const vclashConfigs = path.join(getDataPath(), 'vclash-configs')
+  let exist = fs.existsSync(vclashConfigs)
   if (!exist) {
     if (isElectronDebug()) {
-      console.log('Clashy configs not exist, creating...')
+      console.log('vclash configs not exist, creating...')
     }
-    await mkDir(clashyConfigs)
+    await mkDir(vclashConfigs)
   }
-  const clashyConfigFile = path.join(getDataPath(), 'clashy-configs', 'configs.json')
-  exist = fs.existsSync(clashyConfigFile)
+  const vclashConfigFile = path.join(getDataPath(), 'vclash-configs', 'configs.json')
+  exist = fs.existsSync(vclashConfigFile)
   if (!exist) {
-    fs.writeFileSync(clashyConfigFile, '')
+    fs.writeFileSync(vclashConfigFile, '')
     if (isElectronDebug()) {
-      console.log('Created Clashy configs.')
+      console.log('Created vclash configs.')
     }
   }
 }

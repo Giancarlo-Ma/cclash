@@ -1,4 +1,6 @@
-# my-clash
+# vclash
+
+A vuejs implementation gui of clash tool
 
 ## Project setup
 ```

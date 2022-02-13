@@ -3,7 +3,7 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import { GET_CLASHY_CONFIG, FETCH_PROFILES, ADD_PROFILE, SWITCH_PROFILE, RELOAD_PROFILE, DELETE_PROFILE, SWITCH_PROXY } from './native-support/message-constant'
+import { GET_VCLASH_CONFIG, FETCH_PROFILES, ADD_PROFILE, SWITCH_PROFILE, RELOAD_PROFILE, DELETE_PROFILE, SWITCH_PROXY } from './native-support/message-constant'
 import { getCurrentConfig, initConfigsIfNeeded, switchProfile, switchProxy } from './native-support/configs-manager'
 import { fetchProfiles } from './native-support/profiles-manager'
 import { addProfile, reloadProfile, deleteProfile } from './native-support/subscription-updater'
@@ -65,7 +65,7 @@ app.on('activate', () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
-  ipcMain.handle(GET_CLASHY_CONFIG, getCurrentConfig)
+  ipcMain.handle(GET_VCLASH_CONFIG, getCurrentConfig)
   ipcMain.handle(FETCH_PROFILES, fetchProfiles)
   ipcMain.handle(SWITCH_PROFILE, switchProfile)
   ipcMain.handle(ADD_PROFILE, addProfile)

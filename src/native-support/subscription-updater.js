@@ -8,7 +8,7 @@ import { download } from './utils';
 
 async function getSavedSubscriptions() {
   createSubscriptionFileIfNeeded();
-  const file = join(getDataPath(), 'clashy-configs', 'subscriptions.json');
+  const file = join(getDataPath(), 'vclash-configs', 'subscriptions.json');
   console.log(file)
   const content = fs.readFileSync(file, 'utf8')
   if (content == null || content.length === 0) {
@@ -60,7 +60,7 @@ export async function deleteProfile(e, fileName) {
 }
 
 function _saveSubscriptions(subscriptions) {
-  const filePath = join(getDataPath(), 'clashy-configs', 'subscriptions.json')
+  const filePath = join(getDataPath(), 'vclash-configs', 'subscriptions.json')
   fs.writeFileSync(filePath, JSON.stringify(subscriptions))
 }
 

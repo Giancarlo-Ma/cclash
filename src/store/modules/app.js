@@ -3,7 +3,7 @@ import { requestClashConfigs, requestSaveClashConfigs } from '../../api'
 const state = () => ({
 	currentTab: 'Status',
 	configs: {},
-	clashy: {
+	vclash: {
 		startWithSystem: false,
 		systemProxy: false
 	},
@@ -20,8 +20,8 @@ const mutations = {
 	gotError(state, error) {
 		state.error = error
 	},
-	gotClashy(state, clashy) {
-		state.clashy = clashy
+	gotVclash(state, vclash) {
+		state.vclash = vclash
 	}
 }
 
@@ -31,8 +31,8 @@ const getters = {
 		const socksPort = state.configs['socks-port']
 		const httpPort = state.configs['port']
 		const allowLan = state.configs['allow-lan']
-		const startWithSystem = state.clashy.startWithSystem
-		const systemProxy = state.clashy.systemProxy
+		const startWithSystem = state.vclash.startWithSystem
+		const systemProxy = state.vclash.systemProxy
 		return { mode, socksPort, httpPort, allowLan, startWithSystem, systemProxy }
 	}
 }
@@ -42,8 +42,8 @@ const actions = {
 		try {
 			const configs = await requestClashConfigs()
 			commit('gotConfigs', configs)
-			const clashy = await window.electronAPI.getClashyConfig()
-			commit('gotClashy', clashy)
+			const vclash = await window.electronAPI.getVclashConfig()
+			commit('gotVclash', vclash)
 		} catch (err) {
 			commit('gotError', err)
 		}
