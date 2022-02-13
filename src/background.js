@@ -3,8 +3,8 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import { BRG_MSG_GET_CLASHY_CONFIG, FETCH_PROFILES, ADD_PROFILE, SWITCH_PROFILE, RELOAD_PROFILE, DELETE_PROFILE } from './native-support/message-constant'
-import { getCurrentConfig, initConfigsIfNeeded, switchProfile } from './native-support/configs-manager'
+import { GET_CLASHY_CONFIG, FETCH_PROFILES, ADD_PROFILE, SWITCH_PROFILE, RELOAD_PROFILE, DELETE_PROFILE, SWITCH_PROXY } from './native-support/message-constant'
+import { getCurrentConfig, initConfigsIfNeeded, switchProfile, switchProxy } from './native-support/configs-manager'
 import { fetchProfiles } from './native-support/profiles-manager'
 import { addProfile, reloadProfile, deleteProfile } from './native-support/subscription-updater'
 import { spawnClash } from './native-support/clash-binary'
@@ -65,11 +65,13 @@ app.on('activate', () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
+  ipcMain.handle(GET_CLASHY_CONFIG, getCurrentConfig)
   ipcMain.handle(FETCH_PROFILES, fetchProfiles)
   ipcMain.handle(SWITCH_PROFILE, switchProfile)
   ipcMain.handle(ADD_PROFILE, addProfile)
   ipcMain.handle(DELETE_PROFILE, deleteProfile)
   ipcMain.handle(RELOAD_PROFILE, reloadProfile)
+  ipcMain.handle(SWITCH_PROXY, switchProxy)
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
     try {
@@ -101,75 +103,4 @@ if (isDevelopment) {
       app.quit()
     })
   }
-}
-
-ipcMain.on('IPC_MESSAGE_QUEUE', (event, args) => {
-  dispatchIPCCalls(args)
-})
-
-function dispatchIPCCalls(event) {
-  switch (event.__name) {
-    case BRG_MSG_GET_CLASHY_CONFIG:
-      resolveIPCCall(event, event.__callbackId, getCurrentConfig())
-      break
-    // case BRG_MSG_ADD_SUBSCRIBE:
-    //   console.log(event)
-    //   addSubscription(event.arg)
-    //     .then(() => {
-    //       resolveIPCCall(event, event.__callbackId)
-    //     })
-    //     .catch(e => {
-    //       console.log(e.message)
-    //       // deleteSubscription(event.arg)
-    //       //   .catch(e => console.log(e))
-    //       //   .finally(() => {
-    //       //       rejectIPCCall(event, event.__callbackId, e)
-    //       //   })
-    //     })
-    //   break
-    // case BRG_MSG_SWITCHED_PROFILE:
-    //   switchProfile(event.arg)
-    //   resolveIPCCall(event, event.__callbackId, null)
-    //   break
-    // case BRG_MSG_RELOAD_PROFILE:
-    //   updateSubscription(event.arg).then(() => {
-    //     resolveIPCCall(event, event.__callbackId)
-    //   }).catch(e => {
-    //     console.error(e)
-    //     rejectIPCCall(event, event.__callbackId, e)
-    //   })
-    //   break
-    // case BRG_MSG_DELETE_SUBSCRIBE:
-    //   deleteSubscription(event.arg)
-    //     .then(() => {
-    //       if (event.arg === getCurrentConfig().currentProfile) {
-    //         setProxy('', '')
-    //       }
-    //       resolveIPCCall(event, event.__callbackId, {})
-    //     })
-    //     .catch(e => rejectIPCCall(event, event.__callbackId, e))
-    //   break
-  }
-}
-
-function resolveIPCCall(event, callbackId, result) {
-  if (win == null) {
-    return
-  }
-  win.webContents.send('IPC_MESSAGE_QUEUE', {
-    __callbackId: callbackId,
-    event,
-    value: result
-  })
-}
-
-function rejectIPCCall(event, callbackId, error) {
-  if (win == null) {
-    return
-  }
-  win.webContents.send('IPC_MESSAGE_QUEUE_REJECT', {
-    __callbackId: callbackId,
-    event,
-    value: error
-  })
 }

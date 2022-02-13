@@ -72,13 +72,13 @@ export function createSubscriptionFileIfNeeded() {
   const subscriptions = path.join(getDataPath(), 'clashy-configs', 'subscriptions.json')
   const exist = fs.existsSync(subscriptions)
   if (!exist) {
-      if (isElectronDebug()) {
-          console.log('Subscription file not exist, creating...')
-      }
-      fs.writeFileSync(subscriptions, '{"subscriptions" : []}')
-      if (isElectronDebug()) {
-          console.log('Created subscription file.')
-      }
+    if (isElectronDebug()) {
+      console.log('Subscription file not exist, creating...')
+    }
+    fs.writeFileSync(subscriptions, '{"subscriptions" : []}')
+    if (isElectronDebug()) {
+      console.log('Created subscription file.')
+    }
   }
 }
 
@@ -128,18 +128,18 @@ async function _createClashConfigsIfNeeded() {
 export function switchProfile(e, profile) {
   console.log(profile)
   if (profile == null || profile.length === 0) {
-      profile = getDefaultClashConfig()
+    profile = getDefaultClashConfig()
   }
   saveConfig({
-      ...getCurrentConfig(),
-      currentProfile: profile
+    ...getCurrentConfig(),
+    currentProfile: profile
   })
 }
 
-export function setProxy(selector, proxy) {
+export function switchProxy(e, { selector, proxy }) {
   saveConfig({
-      ...getCurrentConfig(),
-      currentProxy: proxy || '',
-      currentSelector: selector || ''
+    ...getCurrentConfig(),
+    currentProxy: proxy || '',
+    currentSelector: selector || ''
   })
 }

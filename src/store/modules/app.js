@@ -1,6 +1,4 @@
 import { requestClashConfigs, requestSaveClashConfigs } from '../../api'
-import { callIPC } from '../../native-support/message-queue'
-import {  BRG_MSG_GET_CLASHY_CONFIG } from '../../native-support/message-constant'
 
 const state = () => ({
 	currentTab: 'Status',
@@ -44,8 +42,7 @@ const actions = {
 		try {
 			const configs = await requestClashConfigs()
 			commit('gotConfigs', configs)
-			const clashy = await callIPC(BRG_MSG_GET_CLASHY_CONFIG)
-			console.log(clashy)
+			const clashy = await window.electronAPI.getClashyConfig()
 			commit('gotClashy', clashy)
 		} catch (err) {
 			commit('gotError', err)

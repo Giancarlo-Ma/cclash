@@ -1,16 +1,5 @@
 import { ipcRenderer, contextBridge } from 'electron'
-import { ADD_PROFILE, FETCH_PROFILES, SWITCH_PROFILE, DELETE_PROFILE, RELOAD_PROFILE} from './native-support/message-constant'
-
-
-contextBridge.exposeInMainWorld('electronIPC', {
-  on (eventName, callback) {
-    ipcRenderer.on(eventName, callback)
-  },
-  send (channel, data) {
-    ipcRenderer.send(channel, data)
-  },
-  
-})
+import { ADD_PROFILE, FETCH_PROFILES, SWITCH_PROFILE, DELETE_PROFILE, RELOAD_PROFILE, SWITCH_PROXY, GET_CLASHY_CONFIG } from './native-support/message-constant'
 
 contextBridge.exposeInMainWorld('electronAPI', {
   fetchProfiles: () => ipcRenderer.invoke(FETCH_PROFILES),
@@ -18,4 +7,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   addProfile: (url) => ipcRenderer.invoke(ADD_PROFILE, url),
   deleteProfile: (profileUrl) => ipcRenderer.invoke(DELETE_PROFILE, profileUrl),
   reloadProfile: (profileUrl) => ipcRenderer.invoke(RELOAD_PROFILE, profileUrl),
+  switchProxy: ({ selector, proxy }) => ipcRenderer.invoke(SWITCH_PROXY, { selector, proxy }),
+  getClashyConfig: () => ipcRenderer.invoke(GET_CLASHY_CONFIG)
 })

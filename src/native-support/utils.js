@@ -80,11 +80,3 @@ export function download (url, dest) {
     })
   })
 }
-
-export function writeStream(stream, content) {
-  return new Promise((resolve) => {
-      stream.write(content, () => {
-          resolve()
-      })
-  })
-}
